@@ -39,3 +39,23 @@ As we have not implemented `deallocate` this will not free at the end of the sco
 We could also replace the error handling with `asm!("int 3")` to further shorten
 the code.
 
+## Generated code
+
+https://godbolt.org/z/fGh4j433K
+
+```
+example::test:
+        push    rax
+        mov     rcx, qword ptr [rip + example::PTR@GOTPCREL]
+        mov     eax, 16
+        lock            xadd    qword ptr [rcx], rax
+        lea     rcx, [rax + 4]
+        cmp     rcx, 1048577
+        jae     .LBB0_1
+        mov     rcx, qword ptr [rip + example::MEMORY@GOTPCREL]
+        mov     dword ptr [rcx + rax], 1
+        pop     rax
+        ret
+...
+```
+
