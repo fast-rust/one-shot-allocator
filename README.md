@@ -6,7 +6,7 @@ strategies.
 One such strategy is the one-shot allocator that allocates, but does not free.
 
 This is similar to a garbage-collected allocator with garbage collection
-disabled use by many Java-based servers.
+disabled used by many Java-based servers.
 
 When we run out of memory, we restart the service.
 
