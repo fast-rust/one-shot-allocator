@@ -38,7 +38,40 @@ unsafe impl Allocator for MyAlloc {
     unsafe fn deallocate(&self, _ptr: NonNull<u8>, _layout: Layout) {}
 }
 
+#[test]
 pub fn test() {
     let _b = Box::new_in(1, MyAlloc);
 }
 
+fn rdtsc() -> u64 {
+    unsafe { std::arch::x86_64::_rdtsc() }
+}
+
+pub fn perf_test1() {
+    let mut times = [0; 10];
+    for i in 0..times.len() {
+        let t0 = rdtsc();
+        {
+            let _b = std::hint::black_box(Box::new_in(1, MyAlloc));
+        }
+        times[i] = rdtsc().wrapping_sub(t0);
+    }
+    println!("new_in: {:?} cycles", times);
+}
+
+pub fn perf_test2() {
+    let mut times = [0; 10];
+    for i in 0..times.len() {
+        let t0 = rdtsc();
+        {
+            let _b = std::hint::black_box(Box::new(1));
+        }
+        times[i] = rdtsc().wrapping_sub(t0);
+    }
+    println!("new: {:?} cycles", times);
+}
+
+fn main() {
+    perf_test1();
+    perf_test2();
+}

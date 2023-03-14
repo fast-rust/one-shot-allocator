@@ -14,15 +14,18 @@ This streategy is only used on very high performance services, embedded systems
 and console games. As malloc is a large source of slowdown, for example allocating
 header fields in HTTP servers, this will remove that overhead.
 
-We use an atomic variable to make this thread safe. This is probably cheaper
-than using thread local memory on many platforms which call the OS to get
-the TLS pointer. As memory is allocated sequentially, cache behaviour is
-likely to be ideal.
+We use an atomic variable to make this thread safe. As memory is allocated sequentially,
+cache behaviour is likely to be ideal.
 
-A smarter allocator would use pool allocation to pull the next block off
-a linked list and page allocate when the list is exhausted. Freeing can be done
-by adding the object back on the list. Some quantisation of block sizes is
-required to make this more efficient as otherwise the number of pools will grow.
+## The default rust allocator.
+
+Note that the glibc malloc is no slouch. It uses thread local memory to allocate
+from a local pool. We could also use the same trick with much less overhead,
+but this is just an illustration, not a perfect implementation!
+
+On x86-64 linux, thread local access is pretty good, using the fs: segment for
+local storage. It would be interesting to compare the `thread_local!` macro with
+this.
 
 ## Use
 
@@ -59,3 +62,5 @@ example::test:
 ...
 ```
 
+Note there are no calls to external libraries and hence very little
+cold code overhead.
